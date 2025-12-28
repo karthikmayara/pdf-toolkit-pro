@@ -3038,7 +3038,7 @@
             <div id="img-list" style="margin-bottom:20px;"></div>
             
             <!-- Bottom Action Bar (Sticky on mobile) -->
-            <div id="img-action-bar" style="background: var(--bg-panel); padding: 20px; border-radius: 12px; position: sticky; bottom: 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);">
+            <div id="img-action-bar" style="display: none; background: var(--bg-panel); padding: 20px; border-radius: 12px; position: sticky; bottom: 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);">
                 <!-- Convert All Selector -->
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.95rem;">Convert All (<span id="img-count-bar">0</span>) to:</label>
@@ -3140,6 +3140,39 @@
         document.getElementById('menu').style.display = id==='home'?'grid':'none';
         document.querySelectorAll('.workspace').forEach(w=>{w.classList.remove('active'); w.style.display='none'});
         document.getElementById('sig-toolbar').classList.remove('active');
+        
+        // CRITICAL FIX: Conditional action bar cleanup
+        // Only hide action bars when navigating AWAY from their tools
+        console.log('[NAV] Navigating to:', id);
+        
+        if (id !== 'sign') {
+            const signActionBar = document.getElementById('sign-action-bar');
+            if (signActionBar) {
+                console.log('[NAV] Hiding sign-action-bar');
+                signActionBar.style.display = 'none';
+            }
+            window.lastSignedPDF = null;
+        }
+        
+        if (id !== 'compress') {
+            const compressActionBar = document.getElementById('compress-action-bar');
+            if (compressActionBar) {
+                console.log('[NAV] Hiding compress-action-bar');
+                compressActionBar.style.display = 'none';
+            }
+            window.lastCompressedPDF = null;
+        }
+        
+        // img-action-bar is used by both img-comp (Image Optimizer) and images (Image Converter)
+        if (id !== 'img-comp' && id !== 'images') {
+            const imgActionBar = document.getElementById('img-action-bar');
+            if (imgActionBar) {
+                console.log('[NAV] Hiding img-action-bar (navigating away from image tools)');
+                imgActionBar.style.display = 'none';
+            }
+        } else {
+            console.log('[NAV] NOT hiding img-action-bar (staying in image tool)');
+        }
         
         if(id!=='home') {
             const el = document.getElementById(`tool-${id}`); 
@@ -4772,6 +4805,20 @@
         });
     }
     
+    // CRITICAL FIX: Global share function for Image Optimizer
+    window.shareOptimizedImage = async function(blob, filename) {
+        if (!blob) {
+            showToast('❌ No optimized image available');
+            return;
+        }
+        
+        const shared = await shareFile(blob, filename);
+        
+        if (shared) {
+            vibrate(HAPTIC.success);
+        }
+    };
+    
     async function runImageOptimization() {
         // PROCESSING LOCK: Prevent double-clicks
         if (optimizerProcessing.isProcessing) {
@@ -5422,9 +5469,14 @@
         const pendingCount = states.images.filter(img => img.status === 'pending').length;
         const doneCount = states.images.filter(img => img.status === 'done').length;
         
+        console.log('[CONVERTER] updateConverterUIState called:', { pendingCount, doneCount });
+        
         // Show/hide action bar based on pending files
         if (pendingCount > 0) {
-            document.getElementById('img-action-bar').style.display = 'block';
+            const actionBar = document.getElementById('img-action-bar');
+            console.log('[CONVERTER] Showing action bar, current display:', actionBar.style.display);
+            actionBar.style.display = 'block';
+            console.log('[CONVERTER] After setting, display:', actionBar.style.display);
             updateConvertButton();
             
             // SAFETY: Explicitly unlock UI if not processing
@@ -5433,6 +5485,7 @@
             }
         } else {
             // No pending files - hide action bar
+            console.log('[CONVERTER] Hiding action bar (no pending files)');
             document.getElementById('img-action-bar').style.display = 'none';
         }
         
