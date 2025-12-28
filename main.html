@@ -3656,17 +3656,33 @@
         
         // Update instruction text for mobile
         instruction.innerHTML = '👆 Tap to activate';
-        
-        // Click to enter place mode
-        stamp.onclick = () => {
+
+        // MOBILE FIX: Use both onclick AND touch events for better mobile support
+        const activatePlaceMode = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             if(!isPlaceMode) {
                 enterPlaceMode();
             }
         };
-        
+		
+	// Remove old listeners first
+	stamp.onclick = null;
+        stamp.ontouchend = null;
+           
+        // Add new listeners
+	stamp.addEventListener('click', activatePlaceMode);
+        stamp.addEventListener('touchend', activatePlaceMode);
+		
         // Remove drag attributes on mobile
         stamp.removeAttribute('draggable');
         stamp.style.cursor = 'pointer';
+		
+	// MOBILE FIX: Ensure stamp is tappable with proper styles
+	stamp.style.touchAction = 'manipulation';
+	stamp.style.userSelect = 'none';
+	stamp.style.webkitUserSelect = 'none';
+		
     }
     
     function enterPlaceMode() {
