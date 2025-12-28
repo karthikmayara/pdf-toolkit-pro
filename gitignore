@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.directory
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Nothing else needed - it's just one HTML file!
