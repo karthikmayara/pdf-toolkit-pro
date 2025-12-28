@@ -651,7 +651,7 @@
         }
         
         .signature-panel h4::before {
-            content: '✍️';
+            content: ✍️';
             font-size: 1.3rem;
         }
         
@@ -3559,20 +3559,33 @@
         states.placedSigs.forEach(item => {
             const page = pdf.getPages()[item.pageIdx];
             const { width, height } = page.getSize();
-            // Get Canvas Size vs PDF Size
-            const canvas = item.element.parentElement.querySelector('canvas');
-            const scaleX = width / canvas.width;
-            const scaleY = height / canvas.height;
             
+            // FIX: Use ratio-based positioning instead of pixel scaling
+            // Get the page container dimensions (visible size on screen)
+            const pageContainer = item.element.parentElement;
+            const containerWidth = pageContainer.offsetWidth;
+            const containerHeight = pageContainer.offsetHeight;
+            
+            // Get signature position and dimensions from DOM
             const domX = parseFloat(item.element.style.left);
             const domY = parseFloat(item.element.style.top);
             const domW = parseFloat(item.element.style.width);
             const domH = parseFloat(item.element.style.height);
-
-            const pdfX = domX * scaleX;
-            const pdfY = height - (domY * scaleY) - (domH * scaleY);
             
-            page.drawImage(img, { x: pdfX, y: pdfY, width: domW * scaleX, height: domH * scaleY });
+            // Calculate position as ratio (0.0 to 1.0) of container dimensions
+            const xRatio = domX / containerWidth;
+            const yRatio = domY / containerHeight;
+            const wRatio = domW / containerWidth;
+            const hRatio = domH / containerHeight;
+            
+            // Apply ratios to actual PDF page dimensions
+            const pdfX = xRatio * width;
+            const pdfW = wRatio * width;
+            const pdfH = hRatio * height;
+            // PDF coordinates are bottom-up, so we flip Y
+            const pdfY = height - (yRatio * height) - pdfH;
+            
+            page.drawImage(img, { x: pdfX, y: pdfY, width: pdfW, height: pdfH });
         });
         download(await pdf.save(), 'signed.pdf'); loading(false);
     }
@@ -6625,7 +6638,39 @@
     }
 
 
-    function download(d, n) { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([d],{type:n.includes('zip')?'application/zip':'application/pdf'})); a.download=n; a.click(); showToast("Downloaded"); }
+    // FIX: Enhanced download function with proper MIME type detection
+    function download(d, n) {
+        // Detect MIME type from filename extension
+        let mimeType;
+        
+        if (n.endsWith('.zip')) {
+            mimeType = 'application/zip';
+        } else if (n.endsWith('.jpg') || n.endsWith('.jpeg')) {
+            mimeType = 'image/jpeg';
+        } else if (n.endsWith('.png')) {
+            mimeType = 'image/png';
+        } else if (n.endsWith('.webp')) {
+            mimeType = 'image/webp';
+        } else if (n.endsWith('.pdf')) {
+            mimeType = 'application/pdf';
+        } else if (n.endsWith('.txt')) {
+            mimeType = 'text/plain';
+        } else {
+            // Fallback: try to detect from blob if available, or use generic binary
+            mimeType = d.type || 'application/octet-stream';
+        }
+        
+        const a = document.createElement('a');
+        const blobUrl = URL.createObjectURL(new Blob([d], { type: mimeType }));
+        a.href = blobUrl;
+        a.download = n;
+        a.click();
+        
+        // Memory cleanup - revoke the object URL after a short delay
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+        
+        showToast("Downloaded");
+    }
 </script>
 </body>
 </html>
