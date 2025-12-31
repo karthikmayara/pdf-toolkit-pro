@@ -10,6 +10,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Pacifico&family=Great+Vibes&family=Allura&display=swap" rel="stylesheet">
     
+    <!-- PHASE 3: PWA Support (Single-File Approach) -->
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PDF Tools">
+    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22PDF%20Toolkit%20Pro%22%2C%22short_name%22%3A%22PDF%20Tools%22%2C%22description%22%3A%22Complete%20offline%20PDF%20toolkit%20-%20privacy-first%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%236366f1%22%2C%22orientation%22%3A%22any%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%253E%253Crect%20fill%3D%27%25236366f1%27%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27100%27%2F%253E%253Cpath%20fill%3D%27white%27%20d%3D%27M150%2C100h180l70%2C70v242a20%2C20%200%200%2C1-20%2C20h-210a20%2C20%200%200%2C1-20%2C-20v-292a20%2C20%200%200%2C1%2C20%2C-20z%27%2F%253E%253Cpath%20fill%3D%27%2523e0e7ff%27%20d%3D%27M330%2C100v70h70z%27%2F%253E%253Crect%20fill%3D%27%25236366f1%27%20x%3D%27200%27%20y%3D%27220%27%20width%3D%27120%27%20height%3D%2712%27%20rx%3D%276%27%2F%253E%253Crect%20fill%3D%27%25236366f1%27%20x%3D%27200%27%20y%3D%27260%27%20width%3D%27120%27%20height%3D%2712%27%20rx%3D%276%27%2F%253E%253Crect%20fill%3D%27%25236366f1%27%20x%3D%27200%27%20y%3D%27300%27%20width%3D%2780%27%20height%3D%2712%27%20rx%3D%276%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+    
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1919,6 +1926,26 @@
                 grid-template-columns: 1fr !important;
                 gap: 10px !important;
             }
+            
+            /* Image Optimizer Modal Styles */
+            #img-optimizer-upload-modal button:hover {
+                background: var(--bg-hover) !important;
+                border-color: var(--primary) !important;
+            }
+            
+            #img-optimizer-upload-modal button:active {
+                transform: scale(0.98);
+            }
+            
+            /* OCR Modal Styles */
+            #ocr-upload-modal button:hover {
+                background: var(--bg-hover) !important;
+                border-color: var(--primary) !important;
+            }
+            
+            #ocr-upload-modal button:active {
+                transform: scale(0.98);
+            }
         }
         
         /* Mobile-optimized layouts */
@@ -2304,6 +2331,47 @@
             }
         }
         
+        /* ================== PHASE 3: PWA ENHANCEMENTS ================== */
+        /* Enhanced spacing when running as installed PWA (standalone mode) */
+        @media (display-mode: standalone) {
+            /* Mobile PWA: Bigger touch targets and spacing */
+            @media (max-width: 768px) {
+                .upload-area {
+                    min-height: 180px;
+                    padding: 24px;
+                }
+                
+                .btn {
+                    padding: 16px 28px;
+                    font-size: 1.05rem;
+                }
+                
+                #menu {
+                    gap: 20px;
+                }
+                
+                .tool-card {
+                    padding: 24px;
+                }
+            }
+            
+            /* Desktop PWA: More workspace and breathing room */
+            @media (min-width: 769px) {
+                .workspace {
+                    max-width: 1400px;
+                    padding: 40px;
+                }
+                
+                .tool-card {
+                    padding: 28px;
+                }
+                
+                .upload-area {
+                    min-height: 200px;
+                }
+            }
+        }
+        
     </style>
 </head>
 <body>
@@ -2330,6 +2398,14 @@
     <header role="banner">
         <div style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 8px;">
             <h1 style="margin: 0;">📄 PDF Toolkit Pro</h1>
+            
+            <!-- PHASE 3: PWA Install Button (always visible) -->
+            <button id="pwa-install-btn" class="theme-toggle" onclick="installPWA()" 
+                    aria-label="Install App" title="Install as App" 
+                    style="margin-right: 8px;">
+                📱
+            </button>
+            
             <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle Theme">🌓</button>
         </div>
         <p>Fast • Secure • Completely Offline</p>
@@ -2529,10 +2605,47 @@
         <h2>Image Optimizer</h2>
         <p style="text-align: center; color: var(--text-muted); margin: -8px 0 16px 0; font-size: 0.95rem;">Reduce size for web, email & documents</p>
         
-        <div class="upload-area" onclick="document.getElementById('in-img-comp').click()">
-            <p>📂 Select Images</p>
+        <!-- SINGLE BUTTON UI: Upload Images -->
+        <div style="margin-bottom: 24px;">
+            <!-- Desktop: Direct file picker, Mobile: Show modal -->
+            <div class="upload-area img-optimizer-upload-btn" onclick="handleImageOptimizerUploadClick()" style="margin: 0;">
+                <div style="font-size: 2.5rem;">📁</div>
+                <p style="margin: 8px 0 0 0; font-size: 1rem; font-weight: 600;">Upload Images</p>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Select files to optimize</div>
+            </div>
         </div>
-        <input type="file" id="in-img-comp" multiple accept="image/*" style="display:none">
+        
+        <!-- Modal for Mobile: Choose upload method -->
+        <div id="img-optimizer-upload-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center;">
+            <div style="background: var(--bg-card); border-radius: 16px; padding: 24px; max-width: 90%; width: 400px; box-shadow: var(--shadow-lg);">
+                <h3 style="margin: 0 0 20px 0; text-align: center; font-size: 1.2rem;">Choose an action</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button onclick="selectImageOptimizerFiles()" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-panel); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; width: 100%; transition: all 0.3s;">
+                        <div style="font-size: 2rem;">📁</div>
+                        <div style="text-align: left; flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Select Files</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Choose from gallery</div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="selectImageOptimizerCamera()" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-panel); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; width: 100%; transition: all 0.3s;">
+                        <div style="font-size: 2rem;">📸</div>
+                        <div style="text-align: left; flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Take Photo</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Use camera to scan</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <button onclick="closeImageOptimizerModal()" style="margin-top: 16px; width: 100%; padding: 12px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem;">
+                    Cancel
+                </button>
+            </div>
+        </div>
+        
+        <input type="file" id="in-img-comp-files" multiple accept="image/*" style="display:none">
+        <input type="file" id="in-img-comp-camera" accept="image/*" capture="environment" style="display:none">
         
         <div id="comp-editor" style="display:none;">
             <!-- HEIC Warning (shown if detected) -->
@@ -2557,7 +2670,7 @@
                         <button class="btn-outline" onclick="clearAllOptimizerImages()" style="margin: 0; width: auto; padding: 10px 18px; font-size: 0.9rem; border-color: var(--danger); color: var(--danger);">
                             🗑️ Clear All
                         </button>
-                        <button class="btn-outline" onclick="document.getElementById('in-img-comp').click()" style="margin: 0; width: auto; padding: 10px 18px; font-size: 0.9rem;">
+                        <button class="btn-outline" onclick="addMoreOptimizerFiles()" style="margin: 0; width: auto; padding: 10px 18px; font-size: 0.9rem;">
                             📁 Add More Files
                         </button>
                     </div>
@@ -2755,7 +2868,58 @@
         </div>
     </div>
 
-    <div class="workspace" id="tool-ocr"><button class="back-btn" onclick="nav('home')">← Back</button><h2>OCR (Image to Text)</h2><div class="upload-area" onclick="document.getElementById('in-ocr').click()"><p>🖼️ Select Image</p></div><input type="file" id="in-ocr" accept="image/*" style="display:none"><div id="ocr-editor" style="display:none"><div id="ocr-progress" style="margin-bottom:10px;font-weight:bold;color:var(--primary)"></div><textarea id="ocr-output"></textarea><button class="btn" onclick="copyOcr()">Copy Text</button></div></div>
+    <div class="workspace" id="tool-ocr">
+        <button class="back-btn" onclick="nav('home')">← Back</button>
+        <h2>OCR (Image to Text)</h2>
+        
+        <!-- SINGLE BUTTON UI: Upload Images -->
+        <div style="margin-bottom: 24px;">
+            <!-- Desktop: Direct file picker, Mobile: Show modal -->
+            <div class="upload-area ocr-upload-btn" onclick="handleOCRUploadClick()" style="margin: 0;">
+                <div style="font-size: 2.5rem;">📁</div>
+                <p style="margin: 8px 0 0 0; font-size: 1rem; font-weight: 600;">Upload Images</p>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Select image to extract text</div>
+            </div>
+        </div>
+        
+        <!-- Modal for Mobile: Choose upload method -->
+        <div id="ocr-upload-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 9999; justify-content: center; align-items: center;">
+            <div style="background: var(--bg-card); border-radius: 16px; padding: 24px; max-width: 90%; width: 400px; box-shadow: var(--shadow-lg);">
+                <h3 style="margin: 0 0 20px 0; text-align: center; font-size: 1.2rem;">Choose an action</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <button onclick="selectOCRFiles()" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-panel); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; width: 100%; transition: all 0.3s;">
+                        <div style="font-size: 2rem;">📁</div>
+                        <div style="text-align: left; flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Select Image</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Choose from gallery</div>
+                        </div>
+                    </button>
+                    
+                    <button onclick="selectOCRCamera()" style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--bg-panel); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; width: 100%; transition: all 0.3s;">
+                        <div style="font-size: 2rem;">📸</div>
+                        <div style="text-align: left; flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">Take Photo</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">Scan document</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <button onclick="closeOCRModal()" style="margin-top: 16px; width: 100%; padding: 12px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem;">
+                    Cancel
+                </button>
+            </div>
+        </div>
+        
+        <input type="file" id="in-ocr-files" accept="image/*" style="display:none">
+        <input type="file" id="in-ocr-camera" accept="image/*" capture="environment" style="display:none">
+        
+        <div id="ocr-editor" style="display:none">
+            <div id="ocr-progress" style="margin-bottom:10px;font-weight:bold;color:var(--primary)"></div>
+            <textarea id="ocr-output"></textarea>
+            <button class="btn" onclick="copyOcr()">Copy Text</button>
+        </div>
+    </div>
 
     <div class="workspace" id="tool-metadata">
         <button class="back-btn" onclick="nav('home')">← Back</button>
@@ -3143,35 +3307,22 @@
         
         // CRITICAL FIX: Conditional action bar cleanup
         // Only hide action bars when navigating AWAY from their tools
-        console.log('[NAV] Navigating to:', id);
-        
         if (id !== 'sign') {
             const signActionBar = document.getElementById('sign-action-bar');
-            if (signActionBar) {
-                console.log('[NAV] Hiding sign-action-bar');
-                signActionBar.style.display = 'none';
-            }
+            if (signActionBar) signActionBar.style.display = 'none';
             window.lastSignedPDF = null;
         }
         
         if (id !== 'compress') {
             const compressActionBar = document.getElementById('compress-action-bar');
-            if (compressActionBar) {
-                console.log('[NAV] Hiding compress-action-bar');
-                compressActionBar.style.display = 'none';
-            }
+            if (compressActionBar) compressActionBar.style.display = 'none';
             window.lastCompressedPDF = null;
         }
         
         // img-action-bar is used by both img-comp (Image Optimizer) and images (Image Converter)
         if (id !== 'img-comp' && id !== 'images') {
             const imgActionBar = document.getElementById('img-action-bar');
-            if (imgActionBar) {
-                console.log('[NAV] Hiding img-action-bar (navigating away from image tools)');
-                imgActionBar.style.display = 'none';
-            }
-        } else {
-            console.log('[NAV] NOT hiding img-action-bar (staying in image tool)');
+            if (imgActionBar) imgActionBar.style.display = 'none';
         }
         
         if(id!=='home') {
@@ -4411,21 +4562,75 @@
     // Call initialization after DOM is ready
     setTimeout(initImageOptimizer, 100);
     
-    document.getElementById('in-img-comp').addEventListener('change', e => {
+    // Shared handler for both camera and files inputs
+    async function handleOptimizerUpload(files) {
         // PROCESSING LOCK: Prevent uploads during optimization
         if (optimizerProcessing.isProcessing) {
             showToast('⚠️ Please wait for current optimization to complete');
-            e.target.value = '';
             return;
         }
         
-        if(!e.target.files.length) return;
+        if(!files.length) return;
         
-        const newFiles = Array.from(e.target.files);
+        const rawFiles = Array.from(files);
+        
+        // ============================================================
+        // PHASE 3: AUTO-COMPRESSION FOR IMAGE OPTIMIZER
+        // Pre-compress huge files so optimizer doesn't crash
+        // ============================================================
+        loading(true, 'Processing files...');
+        const processedFiles = [];
+        
+        try {
+            for (const file of rawFiles) {
+                let processedFile = file;
+                
+                // Hard limit check (images only)
+                if (file.size > 50 * 1024 * 1024) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                    showToast(`❌ ${file.name} exceeds 50MB limit (${sizeMB}MB)`, 4000);
+                    continue; // Skip this file
+                }
+                
+                // Smart processing based on file size
+                // CRITICAL: 3MB threshold catches camera photos
+                if (file.size > 3 * 1024 * 1024) {
+                    // Camera photos & large files: Pre-compress + Fix EXIF
+                    const beforeMB = (file.size / (1024 * 1024)).toFixed(1);
+                    showToast(`📦 Processing ${file.name} (${beforeMB}MB)...`, 1500);
+                    
+                    processedFile = await autoCompressLargeImage(file);
+                    
+                    if (processedFile === null) {
+                        continue; // Skip rejected file
+                    }
+                    
+                    if (processedFile.size < beforeMB * 1024 * 1024 * 0.9) {
+                        const afterMB = (processedFile.size / (1024 * 1024)).toFixed(1);
+                        showToast(`✅ Reduced to ${afterMB}MB`, 2000);
+                    }
+                } else {
+                    // Very small files (<3MB): Just fix EXIF
+                    processedFile = await fixEXIFOnly(file);
+                }
+                
+                processedFiles.push(processedFile);
+            }
+        } finally {
+            loading(false);
+        }
+        
+        if (processedFiles.length === 0) {
+            showToast('⚠️ No valid files to process');
+            e.target.value = '';
+            return;
+        }
+        // ============================================================
+        
         const previousCount = states.imgCompFiles.length;
         
         // FEATURE: Append new files instead of replacing
-        states.imgCompFiles = [...states.imgCompFiles, ...newFiles];
+        states.imgCompFiles = [...states.imgCompFiles, ...processedFiles];
         
         // FEATURE: Duplicate detection (by name + size)
         const uniqueFiles = [];
@@ -4495,7 +4700,7 @@
             return;
         }
         
-        document.querySelector('#tool-img-comp .upload-area').style.display = 'none';
+        document.querySelectorAll('#tool-img-comp .upload-area').forEach(area => area.parentElement.style.display = 'none');
         document.getElementById('comp-editor').style.display = 'block';
         
         // Calculate total size
@@ -4509,10 +4714,90 @@
         
         // Update preview estimate
         updatePreviewEstimate();
-        
-        // Reset file input to allow re-selecting same files
-        e.target.value = '';
+    }
+    
+    // Add event listeners for both inputs
+    document.getElementById('in-img-comp-files').addEventListener('change', async e => {
+        await handleOptimizerUpload(e.target.files);
+        e.target.value = ''; // Reset
     });
+    
+    document.getElementById('in-img-comp-camera').addEventListener('change', async e => {
+        await handleOptimizerUpload(e.target.files);
+        e.target.value = ''; // Reset
+    });
+    
+    // Function to add more files to Image Optimizer
+    function addMoreOptimizerFiles() {
+        // Don't allow adding during processing
+        if (optimizerProcessing.isProcessing) {
+            showToast('⚠️ Please wait for current optimization to complete');
+            return;
+        }
+        
+        // Trigger the file input
+        const fileInput = document.getElementById('in-img-comp-files');
+        if (fileInput) {
+            fileInput.click();
+        } else {
+            console.error('File input not found');
+            showToast('❌ Error: File input not found');
+        }
+    }
+    
+    // NEW: Handle Image Optimizer upload button click
+    function handleImageOptimizerUploadClick() {
+        // Don't allow uploads during processing
+        if (optimizerProcessing.isProcessing) {
+            showToast('⚠️ Please wait for current optimization to complete');
+            return;
+        }
+        
+        // Check if mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        
+        if (isMobile) {
+            // Mobile: Show modal with options
+            openImageOptimizerModal();
+        } else {
+            // Desktop: Directly open file picker (no camera option)
+            document.getElementById('in-img-comp-files').click();
+        }
+    }
+    
+    // NEW: Open the upload modal (mobile only)
+    function openImageOptimizerModal() {
+        const modal = document.getElementById('img-optimizer-upload-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            vibrate(HAPTIC.light);
+        }
+    }
+    
+    // NEW: Close the upload modal
+    function closeImageOptimizerModal() {
+        const modal = document.getElementById('img-optimizer-upload-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            vibrate(HAPTIC.light);
+        }
+    }
+    
+    // NEW: Select files from gallery (mobile)
+    function selectImageOptimizerFiles() {
+        closeImageOptimizerModal();
+        setTimeout(() => {
+            document.getElementById('in-img-comp-files').click();
+        }, 100);
+    }
+    
+    // NEW: Take photo with camera (mobile)
+    function selectImageOptimizerCamera() {
+        closeImageOptimizerModal();
+        setTimeout(() => {
+            document.getElementById('in-img-comp-camera').click();
+        }, 100);
+    }
     
     // FEATURE: Render image previews with remove buttons
     // Clear All with confirmation for Image Optimizer
@@ -4531,8 +4816,8 @@
             optimizerProcessing.errors = [];
             totalOriginalSize = 0;
             
-            // Reset UI
-            document.querySelector('#tool-img-comp .upload-area').style.display = 'block';
+            // Reset UI - show both upload buttons
+            document.querySelectorAll('#tool-img-comp .upload-area').forEach(area => area.parentElement.style.display = 'flex');
             document.getElementById('comp-editor').style.display = 'none';
             document.getElementById('comp-results').innerHTML = '';
             
@@ -4666,9 +4951,9 @@
         
         showToast(`🗑️ Removed ${fileName}`);
         
-        // If no files left, show upload area again
+        // If no files left, show upload buttons again
         if(states.imgCompFiles.length === 0) {
-            document.querySelector('#tool-img-comp .upload-area').style.display = 'block';
+            document.querySelectorAll('#tool-img-comp .upload-area').forEach(area => area.parentElement.style.display = 'flex');
             document.getElementById('comp-editor').style.display = 'none';
         }
     }
@@ -5469,14 +5754,9 @@
         const pendingCount = states.images.filter(img => img.status === 'pending').length;
         const doneCount = states.images.filter(img => img.status === 'done').length;
         
-        console.log('[CONVERTER] updateConverterUIState called:', { pendingCount, doneCount });
-        
         // Show/hide action bar based on pending files
         if (pendingCount > 0) {
-            const actionBar = document.getElementById('img-action-bar');
-            console.log('[CONVERTER] Showing action bar, current display:', actionBar.style.display);
-            actionBar.style.display = 'block';
-            console.log('[CONVERTER] After setting, display:', actionBar.style.display);
+            document.getElementById('img-action-bar').style.display = 'block';
             updateConvertButton();
             
             // SAFETY: Explicitly unlock UI if not processing
@@ -5485,7 +5765,6 @@
             }
         } else {
             // No pending files - hide action bar
-            console.log('[CONVERTER] Hiding action bar (no pending files)');
             document.getElementById('img-action-bar').style.display = 'none';
         }
         
@@ -5494,6 +5773,128 @@
             document.getElementById('img-results').style.display = 'block';
         } else {
             document.getElementById('img-results').style.display = 'none';
+        }
+    }
+    
+    // ================== LIGHTWEIGHT EXIF FIX (NO COMPRESSION) ==================
+    // For small images that don't need compression but need orientation fix
+    async function fixEXIFOnly(file) {
+        try {
+            // Just fix orientation, don't resize or compress
+            const bitmap = await createImageBitmap(file, {
+                imageOrientation: 'from-image'
+            });
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(bitmap, 0, 0);
+            bitmap.close();
+            
+            // Keep original quality (0.95 instead of 0.85)
+            const blob = await new Promise(resolve => {
+                canvas.toBlob(resolve, file.type || 'image/jpeg', 0.95);
+            });
+            
+            return new File([blob], file.name, {
+                type: file.type || 'image/jpeg',
+                lastModified: Date.now()
+            });
+        } catch (err) {
+            console.error('EXIF fix error:', err);
+            return file; // Fallback to original
+        }
+    }
+    
+    // ================== AUTO-COMPRESSION FOR LARGE IMAGES ==================
+    // PHASE 3: Prevents browser crashes from huge camera photos (15-50MB)
+    // OPTIMIZED: Uses createImageBitmap with imageOrientation flag
+    async function autoCompressLargeImage(file) {
+        try {
+            // HARD LIMIT: Reject files > 50MB (catastrophic failure prevention)
+            if (file.size > 50 * 1024 * 1024) {
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                showToast(`❌ ${file.name} is too large (${sizeMB}MB). Maximum: 50MB`, 4000);
+                return null;
+            }
+            
+            // MAGIC FIX: imageOrientation: 'from-image' automatically fixes EXIF rotation!
+            // This single flag replaces our entire custom fixImageOrientation() function
+            const bitmap = await createImageBitmap(file, { 
+                imageOrientation: 'from-image'  // ⭐ THE HERO FLAG ⭐
+            });
+            
+            // Calculate new dimensions (max 2048px on longest side)
+            let width = bitmap.width;
+            let height = bitmap.height;
+            const maxDimension = 2048;
+            
+            if (width > maxDimension || height > maxDimension) {
+                if (width > height) {
+                    height = Math.round((height / width) * maxDimension);
+                    width = maxDimension;
+                } else {
+                    width = Math.round((width / height) * maxDimension);
+                    height = maxDimension;
+                }
+            }
+            
+            // Create canvas for resizing
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                bitmap.close();
+                throw new Error('Canvas not supported');
+            }
+            
+            // Draw correctly-oriented bitmap to canvas
+            ctx.drawImage(bitmap, 0, 0, width, height);
+            
+            // Clean up bitmap
+            bitmap.close();
+            
+            // Convert to JPEG blob (85% quality = good balance)
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to create compressed image'));
+                        }
+                    },
+                    'image/jpeg',
+                    0.85
+                );
+            });
+            
+            // Create new File object with compressed data
+            const compressedFile = new File(
+                [blob], 
+                file.name.replace(/\.\w+$/, '.jpg'),
+                { type: 'image/jpeg', lastModified: Date.now() }
+            );
+            
+            return compressedFile;
+            
+        } catch (err) {
+            console.error('Auto-compression error:', err.message);
+            
+            // GRACEFUL DEGRADATION: Handle failures based on severity
+            
+            // HARD LIMIT REJECTION: File too dangerous
+            if (file.size > 50 * 1024 * 1024) {
+                return null; // Already showed toast above
+            }
+            
+            // SOFT FAILURE: Compression failed, but file is safe size
+            showToast(`⚠️ Could not optimize ${file.name}. Using original file.`, 3000);
+            return file; // Return original file (risky but allows workflow)
         }
     }
     
@@ -5544,36 +5945,80 @@
         try {
             for (const file of nonHeicFiles) {
                 
+                // ============================================================
+                // PHASE 3: FIX CAMERA PHOTO ORIENTATION (EXIF)
+                // Mobile photos are often rotated/mirrored - fix this first
+                // ============================================================
+                let processedFile = file;
+                
+                if (file.type.startsWith('image/')) {
+                    // ============================================================
+                    // PHASE 3: SMART PROCESSING WITH MEMORY SAFETY
+                    // Camera photos (>3MB): Always compress (prevents memory errors)
+                    // Small files (<3MB): Just fix EXIF (lightweight)
+                    // Large files (>10MB): Full compression
+                    // ============================================================
+                    
+                    // CRITICAL: Lower threshold to 3MB to catch camera photos
+                    // Modern phone cameras produce 5-15MB images which cause memory errors
+                    if (file.size > 3 * 1024 * 1024) {
+                        const beforeMB = (file.size / (1024 * 1024)).toFixed(1);
+                        
+                        // Transparent feedback to user
+                        showToast(`📦 Processing ${file.name} (${beforeMB}MB)...`, 1500);
+                        
+                        // Compress + Fix EXIF (prevents memory errors)
+                        processedFile = await autoCompressLargeImage(file);
+                        
+                        // Handle compression results
+                        if (processedFile === null) {
+                            // File was rejected (>50MB hard limit)
+                            continue; // Skip this file, move to next
+                        }
+                        
+                        const afterMB = (processedFile.size / (1024 * 1024)).toFixed(1);
+                        if (file.size > 10 * 1024 * 1024) {
+                            // Show savings for large files
+                            const saved = Math.round((1 - processedFile.size/file.size) * 100);
+                            showToast(`✅ ${beforeMB}MB → ${afterMB}MB (${saved}% saved)`, 2000);
+                        }
+                    } else {
+                        // Very small file (<3MB) - just fix EXIF orientation
+                        processedFile = await fixEXIFOnly(file);
+                    }
+                }
+                // ============================================================
+                
                 // BRANCH 1: IT IS A PDF
-                if (file.type === 'application/pdf') {
+                if (processedFile.type === 'application/pdf') {
                     try {
-                        loading(true, `Analyzing ${file.name}...`);
+                        loading(true, `Analyzing ${processedFile.name}...`);
                         
                         // Get page count FIRST
-                        const pdf = await pdfjsLib.getDocument(URL.createObjectURL(file)).promise;
+                        const pdf = await pdfjsLib.getDocument(URL.createObjectURL(processedFile)).promise;
                         const pageCount = pdf.numPages;
                         
                         // SAFETY LIMIT: Block > 300 pages
                         if (pageCount > 300) {
-                            showSplitPDFGuidance(file.name, pageCount);
+                            showSplitPDFGuidance(processedFile.name, pageCount);
                             continue; // Skip this file
                         }
                         
                         // SMART DECISION: Auto-extract small PDFs
                         if (pageCount <= 10) {
-                            loading(true, `Extracting ${pageCount} pages from ${file.name}...`);
-                            const pdfImages = await extractPDFPages(file, pdf);
+                            loading(true, `Extracting ${pageCount} pages from ${processedFile.name}...`);
+                            const pdfImages = await extractPDFPages(processedFile, pdf);
                             newImages.push(...pdfImages);
                             
                         } else {
                             // Large PDF (11-300 pages) - keep as single item with page-range option
                             if (pageCount > 100) {
                                 // Show warning for very large PDFs
-                                showLargePDFWarning(file.name, pageCount);
+                                showLargePDFWarning(processedFile.name, pageCount);
                             }
                             
                             newImages.push({
-                                file: file,
+                                file: processedFile,
                                 isPDF: true,
                                 pageCount: pageCount,
                                 pdfDocument: pdf, // Keep PDF loaded for later extraction
@@ -5584,7 +6029,7 @@
                                 outputFormat: 'jpg', // Default output for PDFs
                                 status: 'pending',
                                 convertedBlob: null,
-                                originalSize: file.size,
+                                originalSize: processedFile.size,
                                 convertedSize: 0,
                                 width: 0,
                                 height: 0
@@ -5593,24 +6038,24 @@
                         
                     } catch (error) {
                         console.error('PDF error:', error);
-                        showToast(`❌ Unable to read ${file.name}: ${error.message}`);
+                        showToast(`❌ Unable to read ${processedFile.name}: ${error.message}`);
                         continue; // Skip this file
                     }
                     
                 } 
                 // BRANCH 2: IT IS AN IMAGE
                 else {
-                    // Get image dimensions
-                    const dimensions = await getImageDimensions(file);
+                    // Get image dimensions (using potentially compressed file)
+                    const dimensions = await getImageDimensions(processedFile);
                     
                     newImages.push({
-                        file: file,
+                        file: processedFile, // Uses optimized file!
                         isPDF: false, 
                         rot: 0,
-                        outputFormat: getDefaultFormat(file),
+                        outputFormat: getDefaultFormat(processedFile),
                         status: 'pending',
                         convertedBlob: null,
-                        originalSize: file.size,
+                        originalSize: processedFile.size,
                         convertedSize: 0,
                         width: dimensions.width,
                         height: dimensions.height
@@ -6833,8 +7278,120 @@
     });
     async function addPageNumbers(){ loading(true); const pdf=await PDFDocument.load(await files.numbers.arrayBuffer()); const font=await pdf.embedFont(StandardFonts.Helvetica); const pos=document.getElementById('num-pos').value; const pages=pdf.getPages(); pages.forEach((p,i)=>{ const {width}=p.getSize(); const t=`Page ${i+1} of ${pages.length}`; const tw=font.widthOfTextAtSize(t,12); let x=20; if(pos==='bc')x=width/2-tw/2; if(pos==='br')x=width-tw-20; p.drawText(t,{x:x,y:20,size:12,font:font}); }); download(await pdf.save(),'numbered.pdf'); loading(false); }
 
-    document.getElementById('in-ocr').addEventListener('change', async e=>{ if(!e.target.files[0])return; document.querySelector('#tool-ocr .upload-area').style.display='none'; document.getElementById('ocr-editor').style.display='block'; document.getElementById('ocr-progress').innerText="Initializing..."; Tesseract.recognize(e.target.files[0],'eng',{logger:m=>document.getElementById('ocr-progress').innerText=`Status: ${m.status} (${Math.round(m.progress*100)}%)`}).then(({data:{text}})=>{document.getElementById('ocr-output').value=text;document.getElementById('ocr-progress').innerText="Done!";}); });
+    // Shared OCR handler
+    async function handleOCRUpload(file) {
+        if (!file) return;
+        
+        // Hide upload buttons, show editor
+        document.querySelectorAll('#tool-ocr .upload-area').forEach(area => area.parentElement.style.display = 'none');
+        document.getElementById('ocr-editor').style.display = 'block';
+        document.getElementById('ocr-progress').innerText = "Preparing image...";
+        
+        // OPTIMIZED: Use createImageBitmap with orientation fix
+        try {
+            const bitmap = await createImageBitmap(file, {
+                imageOrientation: 'from-image'  // Magic EXIF fix!
+            });
+            
+            // Convert bitmap to blob for Tesseract
+            const canvas = document.createElement('canvas');
+            canvas.width = bitmap.width;
+            canvas.height = bitmap.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(bitmap, 0, 0);
+            bitmap.close();
+            
+            const blob = await new Promise(resolve => {
+                canvas.toBlob(resolve, 'image/jpeg', 0.95);
+            });
+            
+            const correctedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+            });
+            
+            document.getElementById('ocr-progress').innerText = "Initializing OCR...";
+            
+            // Run OCR on correctly-oriented image
+            Tesseract.recognize(
+                correctedFile,
+                'eng',
+                {
+                    logger: m => {
+                        document.getElementById('ocr-progress').innerText = `Status: ${m.status} (${Math.round(m.progress * 100)}%)`;
+                    }
+                }
+            ).then(({ data: { text } }) => {
+                document.getElementById('ocr-output').value = text;
+                document.getElementById('ocr-progress').innerText = "Done!";
+            });
+        } catch (err) {
+            console.error('OCR image processing error:', err);
+            document.getElementById('ocr-progress').innerText = "Error processing image";
+            showToast('❌ Failed to process image', 3000);
+        }
+    }
+    
+    // Add event listeners for both OCR inputs
+    document.getElementById('in-ocr-files').addEventListener('change', async e => {
+        await handleOCRUpload(e.target.files[0]);
+        e.target.value = '';
+    });
+    
+    document.getElementById('in-ocr-camera').addEventListener('change', async e => {
+        await handleOCRUpload(e.target.files[0]);
+        e.target.value = '';
+    });
+    
     function copyOcr(){ navigator.clipboard.writeText(document.getElementById('ocr-output').value); showToast("Copied"); }
+    
+    // NEW: Handle OCR upload button click
+    function handleOCRUploadClick() {
+        // Check if mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        
+        if (isMobile) {
+            // Mobile: Show modal with options
+            openOCRModal();
+        } else {
+            // Desktop: Directly open file picker (no camera option)
+            document.getElementById('in-ocr-files').click();
+        }
+    }
+    
+    // NEW: Open the OCR upload modal (mobile only)
+    function openOCRModal() {
+        const modal = document.getElementById('ocr-upload-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            vibrate(HAPTIC.light);
+        }
+    }
+    
+    // NEW: Close the OCR upload modal
+    function closeOCRModal() {
+        const modal = document.getElementById('ocr-upload-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            vibrate(HAPTIC.light);
+        }
+    }
+    
+    // NEW: Select files from gallery (mobile)
+    function selectOCRFiles() {
+        closeOCRModal();
+        setTimeout(() => {
+            document.getElementById('in-ocr-files').click();
+        }, 100);
+    }
+    
+    // NEW: Take photo with camera (mobile)
+    function selectOCRCamera() {
+        closeOCRModal();
+        setTimeout(() => {
+            document.getElementById('in-ocr-camera').click();
+        }, 100);
+    }
 
     async function saveTextToPdf(){ const t=document.getElementById('text-pdf-input').value; if(!t)return alert("Empty"); loading(true); const pdf=await PDFDocument.create(); const p=pdf.addPage(); const {width,height}=p.getSize(); const f=await pdf.embedFont(StandardFonts.Helvetica); p.drawText(t,{x:50,y:height-50,size:12,font:f,maxWidth:width-100}); download(await pdf.save(),'notes.pdf'); loading(false); }
 
@@ -7379,6 +7936,158 @@
         setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
         
         showToast("Downloaded");
+    }
+    
+    // ================== PHASE 3: PWA SUPPORT ==================
+    // Single-file PWA implementation (no separate sw.js or manifest.json files)
+    
+    // PWA: Manual Install Trigger
+    let deferredInstallPrompt;
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent mini-infobar on mobile
+        e.preventDefault();
+        
+        // Save the event for later
+        deferredInstallPrompt = e;
+        
+        // Add pulsing animation to indicate install is ready
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) {
+            installBtn.style.animation = 'gentlePulse 2s ease-in-out infinite';
+            installBtn.title = 'Install App (Ready!)';
+        }
+    });
+    
+    // Function to trigger PWA install
+    async function installPWA() {
+        // Detect if running in embedded browser (Telegram, Facebook, Instagram, etc.)
+        const isEmbedded = /FBAN|FBAV|Instagram|TelegramBot|Telegram|Line|WeChat|QQ/.test(navigator.userAgent);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        
+        // Already installed
+        if (isStandalone) {
+            showToast('✅ App is already installed!', 3000);
+            const installBtn = document.getElementById('pwa-install-btn');
+            if (installBtn) installBtn.style.display = 'none';
+            return;
+        }
+        
+        // Running in embedded browser (Telegram, etc.)
+        if (isEmbedded) {
+            showToast('🌐 Please open in your browser (Chrome/Safari) to install the app', 5000);
+            setTimeout(() => {
+                showToast('💡 Tap the "⋮" menu → "Open in browser"', 4000);
+            }, 5500);
+            return;
+        }
+        
+        // Check if prompt is available
+        if (!deferredInstallPrompt) {
+            // Provide browser-specific installation instructions
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
+            
+            if (isIOS) {
+                showToast('📱 iOS: Tap Share button → "Add to Home Screen"', 5000);
+            } else if (isAndroid && isChrome) {
+                showToast('📱 Tap browser menu (⋮) → "Install app"', 5000);
+            } else if (isChrome) {
+                showToast('💻 Look for install icon (⊕) in address bar', 4000);
+            } else {
+                showToast('ℹ️ Check browser menu for "Install" option', 4000);
+            }
+            return;
+        }
+        
+        try {
+            // Show install prompt
+            deferredInstallPrompt.prompt();
+            
+            // Wait for user choice
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                showToast('🎉 App installed! Check your home screen.', 3000);
+                vibrate(HAPTIC.success);
+                
+                // Hide install button after successful install
+                const installBtn = document.getElementById('pwa-install-btn');
+                if (installBtn) installBtn.style.display = 'none';
+            } else {
+                showToast('ℹ️ You can install later from browser menu.', 3000);
+            }
+            
+            // Clear the prompt
+            deferredInstallPrompt = null;
+        } catch (err) {
+            console.error('PWA install error:', err);
+            showToast('❌ Installation failed. Try from browser menu.', 3000);
+        }
+    }
+    
+    // Detect successful installation
+    window.addEventListener('appinstalled', () => {
+        showToast('✅ App installed successfully!', 3000);
+        vibrate(HAPTIC.success);
+        
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) installBtn.style.display = 'none';
+    });
+    
+    // PWA: Register Service Worker (Inline Approach)
+    if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+        window.addEventListener('load', () => {
+            const swCode = `
+                const CACHE_NAME = 'pdf-toolkit-v1';
+                
+                self.addEventListener('install', (event) => {
+                    event.waitUntil(
+                        caches.open(CACHE_NAME).then((cache) => {
+                            return cache.add(new Request(self.registration.scope));
+                        })
+                    );
+                    self.skipWaiting();
+                });
+                
+                self.addEventListener('activate', (event) => {
+                    event.waitUntil(
+                        caches.keys().then((cacheNames) => {
+                            return Promise.all(
+                                cacheNames.map((cacheName) => {
+                                    if (cacheName !== CACHE_NAME) {
+                                        return caches.delete(cacheName);
+                                    }
+                                })
+                            );
+                        })
+                    );
+                    self.clients.claim();
+                });
+                
+                self.addEventListener('fetch', (event) => {
+                    event.respondWith(
+                        caches.match(event.request).then((response) => {
+                            return response || fetch(event.request);
+                        })
+                    );
+                });
+            `;
+            
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const swURL = URL.createObjectURL(blob);
+            
+            navigator.serviceWorker.register(swURL)
+                .then((registration) => {
+                    console.log('✅ PWA: Service Worker registered');
+                })
+                .catch((error) => {
+                    console.log('ℹ️ PWA: Service Worker not registered:', error.message);
+                });
+        });
+    } else if (window.location.protocol === 'file:') {
+        console.log('ℹ️ PWA: Offline mode requires http:// or https://');
     }
 </script>
 </body>
