@@ -269,10 +269,6 @@
         }
         
         .theme-toggle { 
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
             background: var(--bg-card); 
             border: 2px solid var(--border); 
             padding: 10px 14px; 
@@ -2399,14 +2395,16 @@
         <div style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 8px;">
             <h1 style="margin: 0;">📄 PDF Toolkit Pro</h1>
             
-            <!-- PHASE 3: PWA Install Button (always visible) -->
-            <button id="pwa-install-btn" class="theme-toggle" onclick="installPWA()" 
-                    aria-label="Install App" title="Install as App" 
-                    style="margin-right: 8px;">
-                📱
-            </button>
-            
-            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle Theme">🌓</button>
+            <!-- Buttons container positioned at the right -->
+            <div style="position: absolute; right: 0; display: flex; gap: 8px;">
+                <!-- PHASE 3: PWA Install Button (always visible) -->
+                <button id="pwa-install-btn" class="theme-toggle" onclick="installPWA()" 
+                        aria-label="Install App" title="Install as App">
+                    📱
+                </button>
+                
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark/light theme" title="Toggle Theme">🌓</button>
+            </div>
         </div>
         <p>Fast • Secure • Completely Offline</p>
     </header>
