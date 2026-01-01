@@ -8088,7 +8088,6 @@
     
     // ================== AUTO-UPDATE DETECTION ==================
     // Check for updates and notify user
-    const CURRENT_VERSION = 'pdf-toolkit-v2';
     
     async function checkForUpdates() {
         try {
@@ -8099,26 +8098,32 @@
             });
             
             if (!response.ok) return;
-            
-            const html = await response.text();
-            
             // Extract version from the fetched HTML
-            const versionMatch = html.match(/const CACHE_NAME = '([^']+)'/);
-            const latestVersion = versionMatch ? versionMatch[1] : null;
-            
-            // Compare versions
-            if (latestVersion && latestVersion !== CURRENT_VERSION) {
-                console.log(`Update available: ${CURRENT_VERSION} → ${latestVersion}`);
-                showUpdateNotification();
-            } else {
-                console.log(`App is up to date (${CURRENT_VERSION})`);
-            }
+			const html = await response.text();
+            const match = html.match(/const CACHE_NAME = '([^']+)'/);
+            if (!match) return;
+			
+			const latestVersion = match[1];
+            const storedVersion = localStorage.getItem('app_version');
+
+
+            // First run → save version
+            if (!storedVersion) {
+                localStorage.setItem('app_version', latestVersion);
+                return;
+            } 
+			const pendingUpdate = localStorage.getItem('pending_update');
+			// Show toast ONLY if version changed
+			if (latestVersion !== storedVersion && pendingUpdate !== latestVersion) {
+			    localStorage.setItem('pending_update', latestVersion);
+			    showUpdateNotification(latestVersion);
+			}         
         } catch (error) {
             console.log('Update check failed:', error);
         }
     }
     
-    function showUpdateNotification() {
+    function showUpdateNotification(newVersion) {
         // Check if notification already exists
         if (document.getElementById('update-notification')) return;
         
@@ -8134,27 +8139,16 @@
         `;
         
         notification.onclick = () => {
-            // Unregister service worker to ensure fresh content
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    registrations.forEach(registration => registration.unregister());
-                });
-            }
-            
-            // Clear all caches
-            if ('caches' in window) {
-                caches.keys().then(names => {
-                    names.forEach(name => caches.delete(name));
-                });
-            }
-            
+            // ✅ Mark this version as accepted
+			localStorage.setItem('app_version', newVersion);
+			localStorage.removeItem('pending_update');
             // Show loading toast
             showToast('⏳ Updating...', 1000);
+			
+			setTimeout(() => {
+			    location.reload(true);
+			}, 800);
             
-            // Reload after a brief delay
-            setTimeout(() => {
-                window.location.reload(true);
-            }, 1000);
         };
         
         document.body.appendChild(notification);
