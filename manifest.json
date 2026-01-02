@@ -2,7 +2,7 @@
   "name": "PDF Toolkit Pro",
   "short_name": "PDF Tools",
   "description": "Complete offline PDF toolkit - privacy-first",
-  "start_url": "/pdf-toolkit-pro/index.html",
+  "start_url": "/pdf-toolkit-pro/",
   "scope": "/pdf-toolkit-pro/",
   "display": "standalone",
   "background_color": "#0f172a",
