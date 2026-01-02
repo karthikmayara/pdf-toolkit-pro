@@ -4744,7 +4744,7 @@
     
     const IMG_PRESETS = {
         document: { quality: 0.75, resize: 2000, format: 'image/jpeg', preserveText: true },
-        photo: { quality: 0.85, resize: 0, format: 'image/jpeg', preserveText: false },
+        photo: { quality: 0.75, resize: 0, format: 'image/jpeg', preserveText: false },
         web: { quality: 0.60, resize: 1280, format: 'image/webp', preserveText: false }
     };
     
@@ -5594,13 +5594,42 @@
                 c.height = rh;
                 c.getContext('2d').drawImage(i, 0, 0, rw, rh);
                 
-                // FIX 3: Add toBlob safety check
+                // FIX: Hybrid safety check - prevent file size increase
                 c.toBlob(blob => {
                     if (!blob) {
                         reject(new Error('Image compression failed'));
                         return;
                     }
-                    resolve(blob);
+                    
+                    // Safety check: If result is larger or within 5% of original
+                    if (blob.size >= f.size * 0.95) {
+                        console.log(`Result (${(blob.size/1024).toFixed(1)}KB) >= Original (${(f.size/1024).toFixed(1)}KB), retrying with lower quality...`);
+                        
+                        // Retry with 15% lower quality
+                        const retryQuality = Math.max(q - 0.15, 0.50);
+                        
+                        c.toBlob(retryBlob => {
+                            if (!retryBlob) {
+                                // Retry failed, return original file
+                                console.log('Retry failed, returning original file');
+                                resolve(f);
+                                return;
+                            }
+                            
+                            // Use whichever is smaller
+                            if (retryBlob.size < f.size) {
+                                console.log(`Retry successful: ${(retryBlob.size/1024).toFixed(1)}KB`);
+                                resolve(retryBlob);
+                            } else {
+                                // Both attempts larger - return original
+                                console.log('Both attempts larger than original, returning original file');
+                                resolve(f);
+                            }
+                        }, t, retryQuality);
+                    } else {
+                        // Normal case: compressed successfully
+                        resolve(blob);
+                    }
                 }, t, q);
             };
             
