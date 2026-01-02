@@ -2420,6 +2420,189 @@
                 transform: translateX(-50%) translateY(0);
             }
         }
+        
+        /* ================== VERSION BADGE STYLES ================== */
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+        
+        .version-badge.update-available {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes badgePulse {
+            0%, 100% { 
+                opacity: 1;
+                box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+            }
+            50% { 
+                opacity: 0.85;
+                box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+            }
+        }
+        
+        /* ================== ENHANCED UPDATE CARD STYLES ================== */
+        .update-card {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            color: #1e293b;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            animation: slideUpBounce 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 420px;
+            width: 90%;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .update-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .update-card-icon {
+            font-size: 32px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .update-card-title {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .update-card-version {
+            display: inline-block;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .update-card-message {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .update-card-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .update-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .update-btn-later {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .update-btn-later:hover {
+            background: #e2e8f0;
+            color: #475569;
+            transform: translateY(-1px);
+        }
+        
+        .update-btn-now {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .update-btn-now:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .update-btn-now:active {
+            transform: translateY(0);
+        }
+        
+        @keyframes slideUpBounce {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(30px);
+            }
+            60% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-5px);
+            }
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+        }
+        
+        /* Mobile responsive for update card and version badge */
+        @media (max-width: 768px) {
+            .update-card {
+                bottom: 10px;
+                max-width: 95%;
+                padding: 20px;
+            }
+            
+            .update-card-actions {
+                flex-direction: column;
+            }
+            
+            .update-btn {
+                width: 100%;
+            }
+            
+            .version-badge {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2445,7 +2628,10 @@
     <!-- Phase E: Semantic landmarks for screen readers -->
     <header role="banner">
         <div style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 8px;">
-            <h1 style="margin: 0;">📄 PDF Toolkit Pro</h1>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center;">
+                <h1 style="margin: 0;">📄 PDF Toolkit Pro</h1>
+                <span id="version-badge" class="version-badge" title="Current version"></span>
+            </div>
             
             <!-- Buttons container positioned at the right -->
             <div id="header-buttons" style="position: absolute; right: 0; display: flex; gap: 8px;">
@@ -8116,6 +8302,7 @@
 			// Show toast ONLY if version changed
 			if (latestVersion !== storedVersion && pendingUpdate !== latestVersion) {
 			    localStorage.setItem('pending_update', latestVersion);
+			    markBadgeForUpdate();
 			    showUpdateNotification(latestVersion);
 			}         
         } catch (error) {
@@ -8124,35 +8311,86 @@
     }
     
     function showUpdateNotification(newVersion) {
-        // Check if notification already exists
-        if (document.getElementById('update-notification')) return;
+        // Prevent duplicate cards
+        if (document.getElementById('update-card')) return;
         
-        const notification = document.createElement('div');
-        notification.id = 'update-notification';
-        notification.className = 'update-notification';
-        notification.innerHTML = `
-            <span style="font-size: 24px;">🎉</span>
-            <div>
-                <div style="font-size: 15px;">New update available!</div>
-                <div style="font-size: 13px; opacity: 0.9;">Tap to reload and update</div>
+        // Extract version number (remove 'pdf-toolkit-v' prefix)
+        const versionNumber = newVersion.replace('pdf-toolkit-v', '');
+        
+        const card = document.createElement('div');
+        card.id = 'update-card';
+        card.className = 'update-card';
+        card.innerHTML = `
+            <div class="update-card-header">
+                <span class="update-card-icon">🎉</span>
+                <div>
+                    <span class="update-card-title">Update Available</span>
+                    <span class="update-card-version">v${versionNumber}</span>
+                </div>
+            </div>
+            <div class="update-card-message">
+                New features and improvements are ready to install. Update now or continue with current version.
+            </div>
+            <div class="update-card-actions">
+                <button class="update-btn update-btn-later" onclick="dismissUpdate()">
+                    Later
+                </button>
+                <button class="update-btn update-btn-now" onclick="applyUpdate('${newVersion}')">
+                    Update Now
+                </button>
             </div>
         `;
         
-        notification.onclick = () => {
-            // ✅ Mark this version as accepted
-			localStorage.setItem('app_version', newVersion);
-			localStorage.removeItem('pending_update');
-            // Show loading toast
-            showToast('⏳ Updating...', 1000);
-			
-			setTimeout(() => {
-			    location.reload(true);
-			}, 800);
-            
-        };
-        
-        document.body.appendChild(notification);
+        document.body.appendChild(card);
         vibrate(HAPTIC.light);
+    }
+    
+    function dismissUpdate() {
+        const card = document.getElementById('update-card');
+        if (card) {
+            card.style.animation = 'slideDown 0.3s ease';
+            setTimeout(() => card.remove(), 300);
+        }
+    }
+    
+    function applyUpdate(newVersion) {
+        // Update badge immediately
+        updateBadgeVersion(newVersion);
+        
+        // Update stored version BEFORE any other action
+        localStorage.setItem('app_version', newVersion);
+        localStorage.removeItem('pending_update');
+        
+        // Remove update card
+        const card = document.getElementById('update-card');
+        if (card) card.remove();
+        
+        // Show updating toast
+        showToast('⏳ Updating to v' + newVersion.replace('pdf-toolkit-v', '') + '...', 2000);
+        
+        // Send message to Service Worker to handle update
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'FORCE_UPDATE'
+            });
+        } else {
+            // Fallback: manual cache clear and reload
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(reg => reg.unregister());
+                });
+            }
+            
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+            
+            setTimeout(() => {
+                window.location.href = window.location.href + '?v=' + Date.now();
+            }, 1500);
+        }
     }
     
     // Check for updates when app loads
@@ -8171,6 +8409,39 @@
         });
     }
     
+    // ================== VERSION BADGE AUTO-SYNC ==================
+    const APP_VERSION = 'pdf-toolkit-v2'.replace('pdf-toolkit-v', '');
+    
+    function initVersionBadge() {
+        const badge = document.getElementById('version-badge');
+        if (badge) {
+            badge.textContent = `v${APP_VERSION}`;
+            badge.title = `Current version: v${APP_VERSION}`;
+        }
+    }
+    
+    function markBadgeForUpdate() {
+        const badge = document.getElementById('version-badge');
+        if (badge) {
+            badge.classList.add('update-available');
+            badge.title = 'Update available! Click update notification.';
+        }
+    }
+    
+    function updateBadgeVersion(newVersion) {
+        const badge = document.getElementById('version-badge');
+        if (badge) {
+            const versionNumber = newVersion.replace('pdf-toolkit-v', '');
+            badge.textContent = `v${versionNumber}`;
+            badge.classList.remove('update-available');
+            badge.title = `Current version: v${versionNumber}`;
+        }
+    }
+    
+    // Initialize badge on page load
+    window.addEventListener('load', initVersionBadge);
+    
+    
     
     // PWA: Register Service Worker (Inline Approach)
     if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
@@ -8178,10 +8449,20 @@
             const swCode = `
                 const CACHE_NAME = 'pdf-toolkit-v2';
                 
+                // Cache only core assets we control
+                const CORE_ASSETS = [
+                    './',
+                    './index.html',
+                    './manifest.json',
+                    './icon-192.png',
+                    './icon-512.png'
+                ];
+                
                 self.addEventListener('install', (event) => {
                     event.waitUntil(
                         caches.open(CACHE_NAME).then((cache) => {
-                            return cache.add(new Request(self.registration.scope));
+                            // Cache core files explicitly
+                            return cache.addAll(CORE_ASSETS);
                         })
                     );
                     self.skipWaiting();
@@ -8203,11 +8484,55 @@
                 });
                 
                 self.addEventListener('fetch', (event) => {
+                    // CRITICAL: Handle HTML navigation offline-first
+                    if (event.request.mode === 'navigate') {
+                        event.respondWith(
+                            caches.match('./index.html')
+                                .then(response => {
+                                    if (response) return response;
+                                    return fetch(event.request)
+                                        .catch(() => caches.match('./index.html'));
+                                })
+                        );
+                        return;
+                    }
+                    
+                    // Handle other resources with runtime caching
                     event.respondWith(
-                        caches.match(event.request).then((response) => {
-                            return response || fetch(event.request);
+                        caches.match(event.request).then((cached) => {
+                            if (cached) return cached;
+                            
+                            return fetch(event.request).then((response) => {
+                                // Cache successful responses (CDN libraries, fonts, etc.)
+                                if (response.ok && event.request.method === 'GET') {
+                                    const clone = response.clone();
+                                    caches.open(CACHE_NAME).then((cache) => {
+                                        cache.put(event.request, clone);
+                                    });
+                                }
+                                return response;
+                            });
                         })
                     );
+                });
+                
+                // Message handler for forced updates
+                self.addEventListener('message', (event) => {
+                    if (event.data?.type === 'FORCE_UPDATE') {
+                        // Clear all caches
+                        caches.keys().then(names => {
+                            return Promise.all(names.map(name => caches.delete(name)));
+                        }).then(() => {
+                            // Unregister and reload clients
+                            self.registration.unregister().then(() => {
+                                self.clients.matchAll().then(clients => {
+                                    clients.forEach(client => {
+                                        client.navigate(client.url + '?updated=' + Date.now());
+                                    });
+                                });
+                            });
+                        });
+                    }
                 });
             `;
             
