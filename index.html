@@ -4811,58 +4811,32 @@
         
         const rawFiles = Array.from(files);
         
-        // ============================================================
-        // PHASE 3: AUTO-COMPRESSION FOR IMAGE OPTIMIZER
-        // Pre-compress huge files so optimizer doesn't crash
-        // ============================================================
-        loading(true, 'Processing files...');
+        // Simple validation without pre-compression
+        // Image Optimizer should receive original files for user control
         const processedFiles = [];
         
-        try {
-            for (const file of rawFiles) {
-                let processedFile = file;
-                
-                // Hard limit check (images only)
-                if (file.size > 50 * 1024 * 1024) {
-                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                    showToast(`❌ ${file.name} exceeds 50MB limit (${sizeMB}MB)`, 4000);
-                    continue; // Skip this file
-                }
-                
-                // Smart processing based on file size
-                // CRITICAL: 3MB threshold catches camera photos
-                if (file.size > 3 * 1024 * 1024) {
-                    // Camera photos & large files: Pre-compress + Fix EXIF
-                    const beforeMB = (file.size / (1024 * 1024)).toFixed(1);
-                    showToast(`📦 Processing ${file.name} (${beforeMB}MB)...`, 1500);
-                    
-                    processedFile = await autoCompressLargeImage(file);
-                    
-                    if (processedFile === null) {
-                        continue; // Skip rejected file
-                    }
-                    
-                    if (processedFile.size < beforeMB * 1024 * 1024 * 0.9) {
-                        const afterMB = (processedFile.size / (1024 * 1024)).toFixed(1);
-                        showToast(`✅ Reduced to ${afterMB}MB`, 2000);
-                    }
-                } else {
-                    // Very small files (<3MB): Just fix EXIF
-                    processedFile = await fixEXIFOnly(file);
-                }
-                
-                processedFiles.push(processedFile);
+        for (const file of rawFiles) {
+            // Hard limit: 50MB per file (safety check)
+            if (file.size > 50 * 1024 * 1024) {
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                showToast(`❌ ${file.name} exceeds 50MB limit (${sizeMB}MB)`, 4000);
+                continue;
             }
-        } finally {
-            loading(false);
+            
+            processedFiles.push(file);
         }
         
         if (processedFiles.length === 0) {
-            showToast('⚠️ No valid files to process');
-            e.target.value = '';
+            showToast('⚠️ No valid files selected');
             return;
         }
-        // ============================================================
+        
+        // Optional: Warn users about very large files
+        const largeFiles = processedFiles.filter(f => f.size > 20 * 1024 * 1024);
+        if (largeFiles.length > 0) {
+            const totalMB = (largeFiles.reduce((sum, f) => sum + f.size, 0) / (1024 * 1024)).toFixed(1);
+            showToast(`⚠️ Processing ${largeFiles.length} large file(s) (${totalMB}MB) - this may take time`, 3000);
+        }
         
         const previousCount = states.imgCompFiles.length;
         
@@ -8411,7 +8385,7 @@
     }
     
     // ================== VERSION BADGE AUTO-SYNC ==================
-    const APP_VERSION = 'pdf-toolkit-v2'.replace('pdf-toolkit-v', '');
+    const APP_VERSION = 'pdf-toolkit-v3'.replace('pdf-toolkit-v', '');
     
     function initVersionBadge() {
         const badge = document.getElementById('version-badge');
