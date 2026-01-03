@@ -4757,20 +4757,21 @@
     let currentImgLevel = 'balanced';
     let totalOriginalSize = 0;
     
-    // CRITICAL FIX: Initialize Image Optimizer with clean event listeners
+    // FIXED: Initialize Image Optimizer without cloning (prevents radio button bugs)
     function initImageOptimizer() {
         const radios = document.querySelectorAll('input[name="comp-level"]');
+        
         radios.forEach(radio => {
-            // Clone node to remove ALL existing event listeners (prevents duplicates)
-            const newRadio = radio.cloneNode(true);
-            radio.parentNode.replaceChild(newRadio, radio);
+            // FIXED: Use dataset flag instead of cloning (Document 4's approach)
+            if (radio.dataset.hasListener) return; // Already initialized
+            radio.dataset.hasListener = 'true';
             
-            // CRITICAL FIX: Don't call selectLevel from change event to prevent loop
-            // Instead, update state directly
-            newRadio.addEventListener('change', function() {
+            radio.addEventListener('change', function() {
                 if(this.checked) {
                     // Update state
                     currentImgLevel = this.value;
+                    
+                    console.log('✅ Radio changed to:', this.value, '| Quality:', IMG_LEVELS[this.value]);
                     
                     // Clear preset buttons (manual click)
                     document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -4784,10 +4785,11 @@
                     // Update UI
                     updateLevelUI();
                     
-                    // Update preview
+                    // Update preview estimate (CRITICAL: This must fire every time)
                     updatePreviewEstimate();
                     
-                    console.log('✅ Radio changed to:', this.value, '| Quality:', IMG_LEVELS[this.value]);
+                    // Haptic feedback
+                    vibrate(HAPTIC.light);
                 }
             });
         });
@@ -8279,36 +8281,52 @@
     // ================== AUTO-UPDATE DETECTION ==================
     // Check for updates and notify user
     
+    // FIXED: Check for updates by fetching sw.js (the source of truth)
     async function checkForUpdates() {
         try {
-            // Fetch the latest version of index.html
-            const response = await fetch(window.location.href, {
+            // FIX: Fetch sw.js instead of index.html (Document 4's approach)
+            const checkUrl = './sw.js?t=' + Date.now(); // Cache-bust
+            
+            const response = await fetch(checkUrl, {
                 cache: 'no-store',
                 headers: { 'Cache-Control': 'no-cache' }
             });
             
-            if (!response.ok) return;
-            // Extract version from the fetched HTML
-			const html = await response.text();
-            const match = html.match(/const CACHE_NAME = '([^']+)'/);
-            if (!match) return;
-			
-			const latestVersion = match[1];
+            if (!response.ok) {
+                console.log('Update check: sw.js fetch failed');
+                return;
+            }
+            
+            // Extract version from sw.js
+            const swText = await response.text();
+            const versionMatch = swText.match(/const CACHE_NAME = '([^']+)'/);
+            
+            if (!versionMatch) {
+                console.log('Update check: Could not extract version from sw.js');
+                return;
+            }
+            
+            const latestVersion = versionMatch[1];
             const storedVersion = localStorage.getItem('app_version');
-
-
-            // First run → save version
+            
+            // First run → save version and exit
             if (!storedVersion) {
                 localStorage.setItem('app_version', latestVersion);
+                console.log('First run, saved version:', latestVersion);
                 return;
-            } 
-			const pendingUpdate = localStorage.getItem('pending_update');
-			// Show toast ONLY if version changed
-			if (latestVersion !== storedVersion && pendingUpdate !== latestVersion) {
-			    localStorage.setItem('pending_update', latestVersion);
-			    markBadgeForUpdate();
-			    showUpdateNotification(latestVersion);
-			}         
+            }
+            
+            const pendingUpdate = localStorage.getItem('pending_update');
+            
+            // Show notification ONLY if version changed and not already pending
+            if (latestVersion !== storedVersion && pendingUpdate !== latestVersion) {
+                console.log('🎉 Update available:', storedVersion, '→', latestVersion);
+                localStorage.setItem('pending_update', latestVersion);
+                markBadgeForUpdate();
+                showUpdateNotification(latestVersion);
+            } else {
+                console.log('✅ App up to date:', latestVersion);
+            }
         } catch (error) {
             console.log('Update check failed:', error);
         }
@@ -8414,7 +8432,7 @@
     }
     
     // ================== VERSION BADGE AUTO-SYNC ==================
-    const APP_VERSION = 'pdf-toolkit-v3'.replace('pdf-toolkit-v', '');
+    const APP_VERSION = 'pdf-toolkit-v3.1'.replace('pdf-toolkit-v', '');
     
     function initVersionBadge() {
         const badge = document.getElementById('version-badge');
