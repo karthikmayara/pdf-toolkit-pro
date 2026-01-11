@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pdf-toolkit-v3.1';
+const CACHE_NAME = 'pdf-toolkit-v4.0';
 
 const CORE_ASSETS = [
   './',

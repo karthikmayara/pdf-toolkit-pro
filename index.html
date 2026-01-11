@@ -7891,96 +7891,120 @@
         showCompressActionBar();
     }
     
-    // MODE 2: Image-Based Compression (Aggressive)
-    async function compressPDFImages(originalSize) {
-        loading(true, 'Starting compression...');
-        
-        const pdf = await pdfjsLib.getDocument(URL.createObjectURL(files.compress)).promise;
-        const newPdf = await PDFDocument.create();
-        const totalPages = pdf.numPages;
-        
-        // POWER COMBO: Get quality from preset
-        const quality = getQualityValue(compressionQuality);
-        
-        // Calculate scale based on quality
-        // Lower quality = also downscale for better compression
-        let renderScale = 1.0;
-        if(quality < 0.6) {
-            renderScale = 0.75; // 75% size for very low quality
-        } else if(quality < 0.75) {
-            renderScale = 0.85; // 85% size for medium quality  
-        }
-        
-        for(let i = 1; i <= totalPages; i++) {
-            // OPTIMIZED: Update progress less frequently (every 5 pages or first/last)
-            // This reduces UI redraws and speeds up compression
-            if(i === 1 || i === totalPages || i % 5 === 0) {
-                const progress = Math.round((i / totalPages) * 100);
-                loading(true, `Compressing... ${progress}% (${i}/${totalPages} pages)`);
-            }
-            
-            const page = await pdf.getPage(i);
-            const originalViewport = page.getViewport({scale: 1.0});
-            const viewport = page.getViewport({scale: renderScale});
-            
-            // Create canvas
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            
-            // POWER COMBO: Apply color mode filter
-            if (compressionColorMode === 'grayscale') {
-                context.filter = 'grayscale(100%)';
-            } else if (compressionColorMode === 'bw') {
-                // Black & White: grayscale + high contrast + brightness adjustment
-                context.filter = 'grayscale(100%) contrast(1.5) brightness(1.1)';
-            }
-            // else: color mode = no filter
-            
-            // Render PDF page to canvas (filter is applied automatically)
-            await page.render({
-                canvasContext: context,
-                viewport: viewport
-            }).promise;
-            
-            // Reset filter (good practice)
-            context.filter = 'none';
-            
-            // Convert canvas to JPEG blob with quality setting
-            const blob = await new Promise(resolve => {
-                canvas.toBlob(resolve, 'image/jpeg', quality);
-            });
-            
-            // Convert blob to array buffer
-            const imageBytes = await blob.arrayBuffer();
-            
-            // Embed image in new PDF
-            const image = await newPdf.embedJpg(imageBytes);
-            
-            // Add page with ORIGINAL dimensions (so page size stays same, image is just compressed)
-            const newPage = newPdf.addPage([originalViewport.width, originalViewport.height]);
-            newPage.drawImage(image, {
-                x: 0,
-                y: 0,
-                width: originalViewport.width,
-                height: originalViewport.height
-            });
-        }
-        
-        loading(true, 'Finalizing compressed PDF...');
-        
-        // Save the new PDF
-        const compressedBytes = await newPdf.save();
-        const compressedSize = compressedBytes.byteLength;
-        
-        // Show results
-        showCompressionResults(originalSize, compressedSize);
-        
-        // SHARE IMPLEMENTATION: Store compressed PDF and show action bar
-        window.lastCompressedPDF = compressedBytes;
-        showCompressActionBar();
-    }
+    // MODE 2: Image-Based Compression (Aggressive) - V4.0 OPTIMIZED
+	async function compressPDFImages(originalSize) {
+		loading(true, 'Starting compression...');
+		
+		const pdf = await pdfjsLib.getDocument(URL.createObjectURL(files.compress)).promise;
+		const newPdf = await PDFDocument.create();
+		const totalPages = pdf.numPages;
+		
+		// POWER COMBO: Get quality from preset
+		const quality = getQualityValue(compressionQuality);
+		
+		// Calculate scale based on quality
+		// Lower quality = also downscale for better compression
+		let renderScale = 1.0;
+		if(quality < 0.6) {
+			renderScale = 0.75; // 75% size for very low quality
+		} else if(quality < 0.75) {
+			renderScale = 0.85; // 85% size for medium quality  
+		}
+		
+		// V4.0 FIX: Create canvases ONCE outside loop (prevents memory leak)
+		const tempCanvas = document.createElement('canvas');
+		const finalCanvas = document.createElement('canvas');
+		
+		for(let i = 1; i <= totalPages; i++) {
+			// OPTIMIZED: Update progress less frequently (every 5 pages or first/last)
+			// This reduces UI redraws and speeds up compression
+			if(i === 1 || i === totalPages || i % 5 === 0) {
+				const progress = Math.round((i / totalPages) * 100);
+				loading(true, `Compressing... ${progress}% (${i}/${totalPages} pages)`);
+			}
+			
+			const page = await pdf.getPage(i);
+			const originalViewport = page.getViewport({scale: 1.0});
+			const viewport = page.getViewport({scale: renderScale});
+			
+			// V4.0 FIX: Resize canvases instead of creating new ones
+			tempCanvas.width = viewport.width;
+			tempCanvas.height = viewport.height;
+			finalCanvas.width = viewport.width;
+			finalCanvas.height = viewport.height;
+			
+			// Re-get contexts AFTER resize (browser compatibility fix)
+			const tempCtx = tempCanvas.getContext('2d');  // ← Fresh context!
+			const finalCtx = finalCanvas.getContext('2d'); // ← Fresh context!
+			
+			// V4.0 FIX: Render to temporary canvas first
+			await page.render({
+				canvasContext: tempCtx,
+				viewport: viewport
+			}).promise;
+			
+			// V4.0 FIX: Apply white background on final canvas BEFORE drawing
+			finalCtx.fillStyle = 'white';
+			finalCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+			
+			// POWER COMBO: Apply color mode filter on final canvas
+			if (compressionColorMode === 'grayscale') {
+				finalCtx.filter = 'grayscale(100%)';
+			} else if (compressionColorMode === 'bw') {
+				// Black & White: grayscale + high contrast + brightness adjustment
+				finalCtx.filter = 'grayscale(100%) contrast(1.5) brightness(1.1)';
+			}
+			// else: color mode = no filter
+			
+			// V4.0 FIX: Draw temp canvas onto final canvas (filter applies here)
+			finalCtx.drawImage(tempCanvas, 0, 0);
+			
+			// Reset filter (good practice)
+			finalCtx.filter = 'none';
+			
+			// Convert final canvas to JPEG blob with quality setting
+			const blob = await new Promise(resolve => {
+				finalCanvas.toBlob(resolve, 'image/jpeg', quality);
+			});
+			
+			// Convert blob to array buffer
+			const imageBytes = await blob.arrayBuffer();
+			
+			// Embed image in new PDF
+			const image = await newPdf.embedJpg(imageBytes);
+			
+			// Add page with ORIGINAL dimensions (so page size stays same, image is just compressed)
+			const newPage = newPdf.addPage([originalViewport.width, originalViewport.height]);
+			newPage.drawImage(image, {
+				x: 0,
+				y: 0,
+				width: originalViewport.width,
+				height: originalViewport.height
+			});
+			
+			// V4.0 FIX: Critical memory cleanup - release pdf.js internal cache
+			if (page.cleanup) {
+				page.cleanup();
+			}
+		}
+		
+		// V4.0 FIX: Final cleanup - zero out canvas dimensions to release memory
+		tempCanvas.width = tempCanvas.height = 0;
+		finalCanvas.width = finalCanvas.height = 0;
+		
+		loading(true, 'Finalizing compressed PDF...');
+		
+		// Save the new PDF
+		const compressedBytes = await newPdf.save();
+		const compressedSize = compressedBytes.byteLength;
+		
+		// Show results
+		showCompressionResults(originalSize, compressedSize);
+		
+		// SHARE IMPLEMENTATION: Store compressed PDF and show action bar
+		window.lastCompressedPDF = compressedBytes;
+		showCompressActionBar();
+	}
     
     // SHARE IMPLEMENTATION: Compress PDF share and download functions
     async function shareCompressedPDF() {
@@ -8432,7 +8456,7 @@
     }
     
     // ================== VERSION BADGE AUTO-SYNC ==================
-    const APP_VERSION = 'pdf-toolkit-v3.1'.replace('pdf-toolkit-v', '');
+    const APP_VERSION = 'pdf-toolkit-v4.0'.replace('pdf-toolkit-v', '');
     
     function initVersionBadge() {
         const badge = document.getElementById('version-badge');
