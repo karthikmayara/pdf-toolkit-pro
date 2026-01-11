@@ -3231,9 +3231,17 @@
                         <button class="btn-outline" onclick="clearCompressPDF()" style="margin: 0; width: auto; padding: 10px 18px; font-size: 0.9rem; border-color: var(--danger); color: var(--danger);">
                             🗑️ Clear
                         </button>
-                        <button class="btn-outline" onclick="document.getElementById('in-compress').click()" style="margin: 0; width: auto; padding: 10px 18px; font-size: 0.9rem;">
-                            📁 Add Another PDF
-                        </button>
+                    </div>
+                </div>
+                
+                <!-- NEW: Single-Page Visual Preview (First page only, Image mode only) -->
+                <div id="compress-preview-section" style="display:none; margin-bottom: 20px; padding: 20px; background: var(--bg-panel); border-radius: 12px; border: 2px solid var(--border);">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 1rem;">📄 First Page Preview</label>
+                    <div id="compress-preview-canvas" style="width: 100%; max-height: 300px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: white; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="compress-page-preview" style="max-width: 100%; max-height: 300px; display: block;"></canvas>
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 8px;">
+                        Showing first page only • No zoom applied • This is how your document will look after compression
                     </div>
                 </div>
                 
@@ -3243,10 +3251,10 @@
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
                         <!-- Structure Optimization Mode -->
-                        <div class="compression-mode" data-mode="structure" onclick="selectCompressionMode('structure')" style="padding: 16px; border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.3s;">
+                        <div class="compression-mode selected" data-mode="structure" onclick="selectCompressionMode('structure')" style="padding: 16px; border: 2px solid var(--primary); border-radius: 12px; cursor: pointer; transition: all 0.3s; background: rgba(99, 102, 241, 0.05);">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                                 <div style="font-size: 1.5rem;">⚡</div>
-                                <div style="font-weight: 600; font-size: 1rem;">Optimize Structure</div>
+                                <div style="font-weight: 600; font-size: 1rem; color: var(--primary);">Optimize Structure</div>
                             </div>
                             <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
                                 • Fast & lossless<br>
@@ -3257,10 +3265,10 @@
                         </div>
                         
                         <!-- Image-Based Compression Mode -->
-                        <div class="compression-mode selected" data-mode="image" onclick="selectCompressionMode('image')" style="padding: 16px; border: 2px solid var(--primary); border-radius: 12px; cursor: pointer; transition: all 0.3s; background: rgba(99, 102, 241, 0.05);">
+                        <div class="compression-mode" data-mode="image" onclick="selectCompressionMode('image')" style="padding: 16px; border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.3s;">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                                 <div style="font-size: 1.5rem;">🖼️</div>
-                                <div style="font-weight: 600; font-size: 1rem; color: var(--primary);">Compress Images</div>
+                                <div style="font-weight: 600; font-size: 1rem;">Compress Images</div>
                             </div>
                             <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
                                 • Aggressive compression<br>
@@ -3344,8 +3352,69 @@
                                 </button>
                             </div>
                             
+                            <!-- NEW: Custom Quality Slider -->
+                            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                                <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Custom Quality: <span id="quality-value-display" style="color: var(--primary);">70%</span></label>
+                                <input type="range" id="custom-quality-slider" min="0" max="100" value="70" step="1" style="width: 100%; height: 6px; border-radius: 3px; background: var(--border); outline: none; -webkit-appearance: none; appearance: none; cursor: pointer;" oninput="updateCustomQuality(this.value)">
+                                <style>
+                                    #custom-quality-slider::-webkit-slider-thumb {
+                                        -webkit-appearance: none;
+                                        appearance: none;
+                                        width: 20px;
+                                        height: 20px;
+                                        border-radius: 50%;
+                                        background: var(--primary);
+                                        cursor: pointer;
+                                        border: 2px solid white;
+                                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                    }
+                                    #custom-quality-slider::-moz-range-thumb {
+                                        width: 20px;
+                                        height: 20px;
+                                        border-radius: 50%;
+                                        background: var(--primary);
+                                        cursor: pointer;
+                                        border: 2px solid white;
+                                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                                    }
+                                </style>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                                    <span>Smaller file</span>
+                                    <span>Better quality</span>
+                                </div>
+                            </div>
+                            
                             <div id="quality-hint" style="padding: 10px; background: rgba(99, 102, 241, 0.05); border-radius: 8px; font-size: 0.8rem; color: var(--text-secondary); text-align: center;">
                                 📊 Balanced compression - recommended for most PDFs
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Additional Options -->
+                    <div style="padding: 20px; background: var(--bg-card); border-radius: 12px; border: 2px solid var(--border); margin-top: 16px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem;">3</span>
+                            Options
+                        </label>
+                        
+                        <!-- Metadata Preservation Toggle -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: flex; align-items: center; cursor: pointer; padding: 12px; background: rgba(16, 185, 129, 0.05); border: 1px solid #10b981; border-radius: 8px;">
+                                <input type="checkbox" id="preserve-metadata-toggle" checked style="margin-right: 10px; width: 18px; height: 18px;" onchange="toggleMetadataPreservation(this.checked)">
+                                <div>
+                                    <div style="font-weight: 600; font-size: 0.9rem; color: #10b981;">Preserve Metadata</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">Keep title, author, creation date, and other document properties</div>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <!-- Live Size Estimation (Page-1 only) -->
+                        <div id="live-size-estimation" style="padding: 12px; background: rgba(99, 102, 241, 0.05); border-radius: 8px; border: 1px solid var(--primary); display: none;">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); text-align: center;">
+                                📊 <strong>Estimated size (approx.):</strong> <span id="estimated-size-display" style="color: var(--primary); font-weight: 600;">Calculating...</span>
+                            </div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 4px;">
+                                Based on first page preview
                             </div>
                         </div>
                     </div>
@@ -3528,6 +3597,7 @@
     }, {rootMargin: "200px"});
 
     function nav(id) {
+        console.log('Navigating to:', id);
         document.querySelectorAll('input').forEach(i=>{if(i.type!=='range'&&i.type!=='color')i.value=''});
         
         // Clear specific grids but preserve img-grid if staying in images tool
@@ -3563,7 +3633,12 @@
         }
         
         if(id!=='home') {
-            const el = document.getElementById(`tool-${id}`); 
+            const el = document.getElementById('tool-' + id); 
+            console.log('Element found:', el);
+            if (!el) {
+                console.error('Element not found for id:', id);
+                return;
+            }
             el.classList.add('active'); 
             el.style.display='block';
             
@@ -3582,6 +3657,9 @@
                     imgControls.style.display='none';
                 }
             }
+            
+            // Scroll to the workspace
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             
             if(id==='sign') { 
                 document.getElementById('sign-step-1').style.display='block'; 
@@ -3748,7 +3826,13 @@
     
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        initSearchBar();
+        console.log('✅ DOM Content Loaded');
+        try {
+            initSearchBar();
+            nav('home'); // Ensure home screen is shown
+        } catch(error) {
+            console.error('❌ Init error:', error);
+        }
         
         // Add haptic feedback to existing button clicks
         document.addEventListener('click', function(e) {
@@ -3766,6 +3850,21 @@
             fontSelect.addEventListener('change', updateTypedSignature);
         }
     });
+    
+    // Fallback: If DOM already loaded when script runs
+    if (document.readyState === 'loading') {
+        console.log('DOM still loading...');
+    } else {
+        console.log('✅ DOM already loaded, initializing now');
+        setTimeout(() => {
+            try {
+                initSearchBar();
+                nav('home');
+            } catch(error) {
+                console.error('❌ Fallback init error:', error);
+            }
+        }, 100);
+    }
 
     function loading(show, text="Processing...") { 
         document.getElementById('loader').style.display = show ? 'flex' : 'none'; 
@@ -7662,12 +7761,14 @@
     async function saveMetadata(){ loading(true); const pdf=await PDFDocument.load(await files.meta.arrayBuffer()); pdf.setTitle(document.getElementById('meta-title').value); pdf.setAuthor(document.getElementById('meta-author').value); download(await pdf.save(),'meta.pdf'); loading(false); }
 
     // ========== COMPRESS PDF - DUAL MODE ==========
-    let compressionMode = 'image'; // 'structure' or 'image'
+    let compressionMode = 'structure'; // 'structure' or 'image' - DEFAULT CHANGED TO STRUCTURE
     let imageQuality = 0.70; // 0.3 to 0.95 (legacy, will be replaced)
     
     // POWER COMBO: New state variables
     let compressionColorMode = 'color'; // 'color', 'grayscale', 'bw'
     let compressionQuality = 'balanced'; // 'email', 'balanced', 'high'
+    let preserveMetadata = true; // NEW: Metadata preservation toggle
+    let customQualityValue = 70; // NEW: Custom quality slider value (0-100)
     
     // Update Color Mode selection
     function updateColorMode(mode) {
@@ -7691,6 +7792,12 @@
         };
         
         document.getElementById('color-mode-hint').innerHTML = hints[mode];
+        
+        // NEW: Update live size estimation and preview
+        if (compressionMode === 'image' && files.compress) {
+            renderCompressPreview();
+        }
+        updateLiveSizeEstimation();
     }
     
     // Update Compression Quality selection
@@ -7707,6 +7814,16 @@
             else opt.classList.remove('selected');
         });
         
+        // NEW: Update custom quality slider to match preset
+        const presetValues = {
+            email: 30,
+            balanced: 50,
+            high: 80
+        };
+        customQualityValue = presetValues[quality] || 50;
+        document.getElementById('custom-quality-slider').value = customQualityValue;
+        document.getElementById('quality-value-display').textContent = customQualityValue + '%';
+        
         // Update hint text
         const hints = {
             email: "📧 Maximum compression - smallest file size for email",
@@ -7715,6 +7832,12 @@
         };
         
         document.getElementById('quality-hint').innerHTML = hints[quality];
+        
+        // NEW: Update live size estimation and preview
+        if (compressionMode === 'image' && files.compress) {
+            renderCompressPreview();
+        }
+        updateLiveSizeEstimation();
     }
     
     // Get quality value from preset
@@ -7727,7 +7850,188 @@
         return qualities[preset] || 0.5;
     }
     
-    // Clear Compress PDF and reset to initial state
+    // NEW: Update custom quality slider
+    function updateCustomQuality(value) {
+        customQualityValue = parseInt(value);
+        document.getElementById('quality-value-display').textContent = value + '%';
+        
+        // Update hint based on quality level
+        const hint = document.getElementById('quality-hint');
+        if (customQualityValue <= 30) {
+            hint.innerHTML = '📧 Maximum compression - smallest file size';
+        } else if (customQualityValue <= 60) {
+            hint.innerHTML = '📊 Balanced compression - good quality/size ratio';
+        } else if (customQualityValue <= 80) {
+            hint.innerHTML = '🖼️ High quality - preserves most details';
+        } else {
+            hint.innerHTML = '✨ Best quality - minimal compression';
+        }
+        
+        // Trigger live size estimation and preview update
+        if (compressionMode === 'image' && files.compress) {
+            renderCompressPreview();
+        }
+        updateLiveSizeEstimation();
+    }
+    
+    // NEW: Toggle metadata preservation
+    function toggleMetadataPreservation(enabled) {
+        preserveMetadata = enabled;
+        const toggle = document.getElementById('preserve-metadata-toggle');
+        const label = toggle.parentElement;
+        
+        if (enabled) {
+            label.style.background = 'rgba(16, 185, 129, 0.05)';
+            label.style.borderColor = '#10b981';
+            label.querySelector('div:first-child').style.color = '#10b981';
+        } else {
+            label.style.background = 'rgba(239, 68, 68, 0.05)';
+            label.style.borderColor = '#ef4444';
+            label.querySelector('div:first-child').style.color = '#ef4444';
+        }
+    }
+    
+    // NEW: Update live size estimation (page-1 only)
+    async function updateLiveSizeEstimation() {
+        if (!files.compress || compressionMode !== 'image') {
+            document.getElementById('live-size-estimation').style.display = 'none';
+            return;
+        }
+        
+        try {
+            document.getElementById('live-size-estimation').style.display = 'block';
+            document.getElementById('estimated-size-display').textContent = 'Calculating...';
+            
+            // Load first page only
+            const pdf = await pdfjsLib.getDocument(URL.createObjectURL(files.compress)).promise;
+            const page = await pdf.getPage(1);
+            const viewport = page.getViewport({scale: 1.0});
+            
+            // Create temporary canvas for estimation
+            const canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            const ctx = canvas.getContext('2d');
+            
+            // Render first page
+            await page.render({
+                canvasContext: ctx,
+                viewport: viewport
+            }).promise;
+            
+            // Apply current settings to estimate
+            const quality = customQualityValue / 100;
+            const blob = await new Promise(resolve => {
+                canvas.toBlob(resolve, 'image/jpeg', quality);
+            });
+            
+            // Estimate total size based on first page
+            const firstPageSize = blob.size;
+            const totalPages = pdf.numPages;
+            
+            // Rough estimation: assume similar compression across pages
+            const estimatedTotalSize = firstPageSize * totalPages;
+            
+            // Apply color mode multiplier
+            let multiplier = 1.0;
+            if (compressionColorMode === 'grayscale') {
+                multiplier = 0.7; // Grayscale typically smaller
+            } else if (compressionColorMode === 'bw') {
+                multiplier = 0.3; // B&W much smaller
+            }
+            
+            const finalEstimatedSize = estimatedTotalSize * multiplier;
+            const estimatedMB = (finalEstimatedSize / (1024 * 1024)).toFixed(2);
+            
+            document.getElementById('estimated-size-display').textContent = '~' + estimatedMB + ' MB';
+            
+            // Cleanup
+            canvas.width = canvas.height = 0;
+            
+        } catch (error) {
+            console.error('Size estimation error:', error);
+            document.getElementById('estimated-size-display').textContent = 'Unable to estimate';
+        }
+    }
+    
+    // NEW: Render single-page visual preview
+    async function renderCompressPreview() {
+        if (!files.compress) {
+            document.getElementById('compress-preview-section').style.display = 'none';
+            return;
+        }
+        
+        // Only show preview in image mode
+        if (compressionMode !== 'image') {
+            document.getElementById('compress-preview-section').style.display = 'none';
+            return;
+        }
+        
+        try {
+            document.getElementById('compress-preview-section').style.display = 'block';
+            
+            // Load first page only
+            const pdf = await pdfjsLib.getDocument(URL.createObjectURL(files.compress)).promise;
+            const page = await pdf.getPage(1);
+            
+            // Get the actual preview canvas element
+            const canvas = document.getElementById('compress-page-preview');
+            
+            // Calculate scale to fit in 300px max height
+            const viewport = page.getViewport({scale: 1});
+            let renderScale = 1;
+            if (viewport.height > 300) {
+                renderScale = 300 / viewport.height;
+            }
+            
+            const scaledViewport = page.getViewport({scale: renderScale});
+            canvas.width = scaledViewport.width;
+            canvas.height = scaledViewport.height;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Apply white background first
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Apply color mode filter BEFORE rendering (works on desktop)
+            if (compressionColorMode === 'grayscale') {
+                ctx.filter = 'grayscale(100%)';
+            } else if (compressionColorMode === 'bw') {
+                ctx.filter = 'grayscale(100%) contrast(1.5) brightness(1.1)';
+            }
+            
+            // Render the page with filters applied
+            await page.render({
+                canvasContext: ctx,
+                viewport: scaledViewport
+            }).promise;
+            
+            // Reset filter
+            ctx.filter = 'none';
+            
+            // NEW: For better mobile support, apply filter after rendering using canvas filters
+            // This ensures both desktop (via filter) and mobile (via CSS) see the effects
+            if (compressionColorMode !== 'color') {
+                const previewContainer = document.getElementById('compress-preview-canvas');
+                if (compressionColorMode === 'grayscale') {
+                    previewContainer.style.filter = 'grayscale(100%)';
+                } else if (compressionColorMode === 'bw') {
+                    previewContainer.style.filter = 'grayscale(100%) contrast(1.5) brightness(1.1)';
+                }
+            } else {
+                document.getElementById('compress-preview-canvas').style.filter = 'none';
+            }
+            
+            console.log('✅ Compress preview rendered with', compressionColorMode, 'mode at', customQualityValue + '%');
+            
+        } catch (error) {
+            console.error('Preview render error:', error);
+            document.getElementById('compress-preview-section').style.display = 'none';
+        }
+    }
+    
+    // Clear current PDF file
     function clearCompressPDF() {
         // PROCESSING LOCK: Prevent clearing during compression
         if (compressProcessing) {
@@ -7736,12 +8040,13 @@
         }
         
         // SAFETY GUARD: Confirmation dialog
-        if (files.compress && confirm('Clear current PDF and start over?')) {
+        if (files.compress && confirm('Clear PDF and start over?')) {
             files.compress = null;
             
             // Reset to initial state
             document.getElementById('compress-controls').style.display = 'none';
             document.getElementById('compress-results').style.display = 'none';
+            document.getElementById('compress-preview-section').style.display = 'none';
             document.querySelector('#tool-compress .upload-area').style.display = 'flex';
             
             // Reset file input
@@ -7750,11 +8055,26 @@
             // Reset to defaults
             compressionColorMode = 'color';
             compressionQuality = 'balanced';
-            compressionMode = 'image';
+            compressionMode = 'structure'; // Default to safe, lossless mode
+            customQualityValue = 70; // Reset custom slider to default
+            preserveMetadata = true; // Reset metadata preservation to ON
+            
+            // Reset UI elements
+            document.getElementById('custom-quality-slider').value = 70;
+            document.getElementById('quality-value-display').textContent = '70%';
+            document.getElementById('compress-size-estimation').textContent = 'Upload a PDF to see size estimation...';
+            
+            // Check and reset metadata toggle button if it exists
+            const metadataBtn = document.getElementById('metadata-preserve-btn');
+            if (metadataBtn) {
+                metadataBtn.style.backgroundColor = 'var(--success)';
+                metadataBtn.style.color = 'white';
+            }
             
             // Re-initialize UI (if user uploads again)
             updateColorMode('color');
             updateCompressionQuality('balanced');
+            selectCompressionMode('structure'); // Set mode selector to structure
             
             showToast('🗑️ PDF cleared - ready for new upload');
         }
@@ -7771,20 +8091,21 @@
         document.getElementById('compress-controls').style.display = 'block';
         document.querySelector('#tool-compress .upload-area').style.display = 'none';
         
-        // Hide previous results if any
-        document.getElementById('compress-results').style.display = 'none';
-        
         // Update file info
         document.getElementById('compress-filename').innerText = files.compress.name;
         document.getElementById('compress-original-size').innerText = fileSizeMB + ' MB';
         
-        // Hide results if previously shown
+        // Hide previous results if any
         document.getElementById('compress-results').style.display = 'none';
         
-        // Set initial mode display
-        selectCompressionMode(compressionMode);
+        // NEW: Render visual preview + trigger live size estimation if in image mode
+        if (compressionMode === 'image') {
+            renderCompressPreview();
+            updateLiveSizeEstimation();
+        }
     });
     
+    // Select compression mode
     function selectCompressionMode(mode) {
         compressionMode = mode;
         
@@ -7807,15 +8128,28 @@
         // Show/hide controls based on mode
         const qualityControl = document.getElementById('image-quality-control');
         const structureInfo = document.getElementById('structure-info');
+        const previewSection = document.getElementById('compress-preview-section');
         
         if(mode === 'image') {
             qualityControl.style.display = 'block';
             structureInfo.style.display = 'none';
+            // NEW: Show visual preview for image mode
+            if (files.compress) {
+                previewSection.style.display = 'block';
+                renderCompressPreview();
+                updateLiveSizeEstimation();
+            }
         } else {
             qualityControl.style.display = 'none';
             structureInfo.style.display = 'block';
+            // NEW: Hide preview for structure mode
+            previewSection.style.display = 'none';
+            document.getElementById('live-size-estimation').style.display = 'none';
         }
     }
+    
+    // Set initial mode display
+    selectCompressionMode(compressionMode);
     
     // ═══════════════════════════════════════════════════════════
     // COMPRESS PDF - PROCESSING LOCK
@@ -7899,8 +8233,8 @@
 		const newPdf = await PDFDocument.create();
 		const totalPages = pdf.numPages;
 		
-		// POWER COMBO: Get quality from preset
-		const quality = getQualityValue(compressionQuality);
+		// POWER COMBO: Use custom quality slider value instead of preset
+		const quality = customQualityValue / 100;
 		
 		// Calculate scale based on quality
 		// Lower quality = also downscale for better compression
@@ -7994,6 +8328,31 @@
 		
 		loading(true, 'Finalizing compressed PDF...');
 		
+		// NEW: Preserve metadata if enabled
+		if (preserveMetadata) {
+			try {
+				const originalPdf = await PDFDocument.load(await files.compress.arrayBuffer());
+				const title = originalPdf.getTitle();
+				const author = originalPdf.getAuthor();
+				const subject = originalPdf.getSubject();
+				const creator = originalPdf.getCreator();
+				const producer = originalPdf.getProducer();
+				const creationDate = originalPdf.getCreationDate();
+				const modificationDate = originalPdf.getModificationDate();
+				
+				if (title) newPdf.setTitle(title);
+				if (author) newPdf.setAuthor(author);
+				if (subject) newPdf.setSubject(subject);
+				if (creator) newPdf.setCreator(creator);
+				if (producer) newPdf.setProducer(producer);
+				if (creationDate) newPdf.setCreationDate(creationDate);
+				if (modificationDate) newPdf.setModificationDate(modificationDate);
+			} catch (error) {
+				console.log('Metadata preservation failed:', error);
+				// Continue without metadata if it fails
+			}
+		}
+		
 		// Save the new PDF
 		const compressedBytes = await newPdf.save();
 		const compressedSize = compressedBytes.byteLength;
@@ -8006,7 +8365,19 @@
 		showCompressActionBar();
 	}
     
-    // SHARE IMPLEMENTATION: Compress PDF share and download functions
+
+    
+    function downloadCompressedPDF() {
+        if (!window.lastCompressedPDF) {
+            showToast('❌ No compressed PDF available');
+            return;
+        }
+        
+        const filename = 'compressed_' + (files.compress ? files.compress.name : 'document.pdf');
+        download(window.lastCompressedPDF, filename);
+        vibrate(HAPTIC.success);
+    }
+    
     async function shareCompressedPDF() {
         if (!window.lastCompressedPDF) {
             showToast('❌ No compressed PDF available');
@@ -8020,17 +8391,6 @@
         if (shared) {
             vibrate(HAPTIC.success);
         }
-    }
-    
-    function downloadCompressedPDF() {
-        if (!window.lastCompressedPDF) {
-            showToast('❌ No compressed PDF available');
-            return;
-        }
-        
-        const filename = 'compressed_' + (files.compress ? files.compress.name : 'document.pdf');
-        download(window.lastCompressedPDF, filename);
-        vibrate(HAPTIC.success);
     }
     
     function showCompressActionBar() {
